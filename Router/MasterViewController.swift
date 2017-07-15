@@ -7,50 +7,52 @@
 //
 
 import UIKit
+import SWXMLHash
 
 class MasterViewController: UITableViewController {
 
     var detailViewController: DetailViewController? = nil
     var objects = [Any]()
+    
+    var routes: XMLIndexer?
+    
+    let service = Service.shared
+    
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        navigationItem.leftBarButtonItem = editButtonItem
-
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(insertNewObject(_:)))
-        navigationItem.rightBarButtonItem = addButton
-        if let split = splitViewController {
-            let controllers = split.viewControllers
-            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+        
+        
+        service.loadRouteDetails(route: 199, completion: { (r) in
+            self.routes = r
+            self.tableView.reloadData()
+            self.title = self.getTitle()
+        }) { (error) in
+            print("Error \(error)")
         }
+        
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
-        super.viewWillAppear(animated)
-    }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    func insertNewObject(_ sender: Any) {
-        objects.insert(NSDate(), at: 0)
-        let indexPath = IndexPath(row: 0, section: 0)
-        tableView.insertRows(at: [indexPath], with: .automatic)
-    }
-
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                let object = objects[indexPath.row] as! NSDate
+                
+                guard let stops = self.getStops() else {
+                    return
+                }
+                
+                let stop = stops[indexPath.row]
+        
+                
                 let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-                controller.detailItem = object
+                controller.detailItem = stop
                 controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true
             }
@@ -64,29 +66,52 @@ class MasterViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return objects.count
+        
+        guard let stops = self.getStops() else {
+            return 0
+        }
+        
+        return stops.all.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-
-        let object = objects[indexPath.row] as! NSDate
-        cell.textLabel!.text = object.description
+        
+        guard let stops = self.getStops() else {
+            return cell
+        }
+        
+        let object = stops[indexPath.row]
+        
+        let title = object.element?.attribute(by: "title")
+        let stopId = object.element?.attribute(by: "stopId")
+        
+        cell.detailTextLabel?.text = title?.text
+        cell.textLabel?.text = stopId?.text
+        
+        
         return cell
     }
-
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            objects.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+    
+    // MARK: - Helper Functions
+    
+    func getStops() -> XMLIndexer?{
+        
+        guard let r = routes else {
+            return nil
         }
+        
+        return r["body"]["route"]["stop"]
+        
+    }
+    
+    func getTitle() -> String?{
+        
+        guard let r = routes else {
+            return nil
+        }
+        
+        return r["body"]["route"].element?.attribute(by: "title")?.text
     }
 
 
