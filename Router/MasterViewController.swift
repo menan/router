@@ -22,7 +22,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
     var searchActive = false
     
     let service = Service.shared
-    
+    let utilities = Utilities.shared
 
 
     override func viewDidLoad() {
@@ -123,12 +123,34 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
+        guard let stops = self.getStops(), stops.count >= indexPath.row  else { return [] }
         
-        let action1 = UITableViewRowAction(style: .default, title: "Add Favorite", handler: {
+        let object = stops[indexPath.row]
+        
+        guard let tag = object.attr("tag"), let tagInt = Int(tag) else { return [] }
+        
+        let isFav = utilities.isFavorite(tag: tagInt, ofKind: .stop)
+        
+        
+        var title = "Mark as Favorite"
+        var backgroundColor = UIColor.blue
+        
+        if isFav {
+            title = "Remove Favorite"
+            backgroundColor = UIColor.gray
+        }
+        
+        let action1 = UITableViewRowAction(style: .default, title: title, handler: {
             (action, indexPath) in
-            print("Action1")
+            if isFav {
+                self.utilities.removeFromFavorites(tag: tagInt, ofKind: .stop)
+            }
+            else{
+                self.utilities.markAsFavorite(tag: tagInt, ofKind: .stop)
+            }
+            self.tableView.setEditing(false, animated: true)
         })
-        action1.backgroundColor = UIColor.blue
+        action1.backgroundColor = backgroundColor
         return [action1]
     }
     

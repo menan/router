@@ -12,6 +12,7 @@ class Constants {
 
     static let domain = "http://webservices.nextbus.com"
     
-    static let favoritesKey = "Favorites"
+    static let favoriteRoutesKey = "FavoriteRoutes"
+    static let favoriteStopsKey = "FavoritesStops"
     
 }

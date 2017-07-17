@@ -15,6 +15,8 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     var filtered: [XMLIndexer]?
     var searchActive = false
     
+    let utilities = Utilities.shared
+    
     var masterViewCtrl: MasterViewController?
     
     override func viewDidLoad() {
@@ -111,15 +113,39 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
         self.dismiss(animated: true, completion: nil)
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        guard let stops = self.getStops(), stops.count >= indexPath.row  else { return [] }
+        
+        let object = stops[indexPath.row]
+        
+        guard let tag = object.attr("tag"), let tagInt = Int(tag) else { return [] }
+        
+        let isFav = utilities.isFavorite(tag: tagInt, ofKind: .route)
+        
+        
+        var title = "Mark as Favorite"
+        var backgroundColor = UIColor.blue
+        
+        if isFav {
+            title = "Remove Favorite"
+            backgroundColor = UIColor.gray
+        }
+        
+        let action1 = UITableViewRowAction(style: .default, title: title, handler: {
+            (action, indexPath) in
+            if isFav {
+                self.utilities.removeFromFavorites(tag: tagInt, ofKind: .route)
+            }
+            else{
+                self.utilities.markAsFavorite(tag: tagInt, ofKind: .route)
+            }
+            self.tableView.setEditing(false, animated: true)
+        })
+        action1.backgroundColor = backgroundColor
+        return [action1]
     }
-    */
     
     
     // MARK: - Helper Functions
