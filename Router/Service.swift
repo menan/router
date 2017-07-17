@@ -16,14 +16,13 @@ class Service {
     
     let debug = false
     
-    var agency = "ttc"
     
     
     //MARK: Route API Calls
     
     func loadRouteDetails(route routeId: Int, completion: @escaping (_ result: [XMLIndexer],_ title: String?) -> Void){
         
-        let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=routeConfig&a=\(agency)&r=\(routeId)")
+        let request = Alamofire.request("\(Config.domain)/service/publicXMLFeed?command=routeConfig&a=\(Config.agency)&r=\(routeId)")
             .response { response in
                 
                 if let data = response.data {
@@ -42,7 +41,7 @@ class Service {
     
     func loadRoutes(agency agencyId: String, completion: @escaping (_ result: [XMLIndexer]) -> Void){
         
-        let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=routeList&a=\(agencyId)")
+        let request = Alamofire.request("\(Config.domain)/service/publicXMLFeed?command=routeList&a=\(agencyId)")
             .response { response in
                 
                 if let data = response.data {
@@ -58,9 +57,9 @@ class Service {
     
     
     
-    func loadPredictions(route routeId: Int, stop stopId: Int, completion: @escaping (_ result: [XMLIndexer],_ title: String?) -> Void){
+    func loadPredictions(route routeId: Int, stop stopId: String, completion: @escaping (_ result: [XMLIndexer],_ title: String?) -> Void){
         
-        let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=predictions&a=\(agency)&r=\(routeId)&s=\(stopId)")
+        let request = Alamofire.request("\(Config.domain)/service/publicXMLFeed?command=predictions&a=\(Config.agency)&r=\(routeId)&s=\(stopId)")
             .response { response in
                 
                 if let data = response.data {

@@ -54,7 +54,7 @@ class Utilities {
     }
     
     func getFavorites(ofKind kind: Kind) -> [Int]{
-        let key = kind == .stop ? Constants.favoriteStopsKey : Constants.favoriteRoutesKey
+        let key = kind == .stop ? Config.favoriteStopsKey : Config.favoriteRoutesKey
         
         if let favs = defaults.array(forKey: key) as? [Int] {
             return favs
@@ -63,7 +63,7 @@ class Utilities {
     }
     
     func saveFavourites(values: [Int], ofKind kind: Kind){
-        let key = kind == .stop ? Constants.favoriteStopsKey : Constants.favoriteRoutesKey
+        let key = kind == .stop ? Config.favoriteStopsKey : Config.favoriteRoutesKey
         defaults.set(values, forKey: key)
     }
     

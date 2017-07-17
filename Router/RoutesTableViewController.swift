@@ -15,6 +15,8 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     var filtered: [XMLIndexer]?
     var searchActive = false
     
+    var loading = true
+    
     let utilities = Utilities.shared
     
     var masterViewCtrl: MasterViewController?
@@ -22,7 +24,8 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        Service.shared.loadRoutes(agency: "ttc", completion: { (r) in
+        Service.shared.loadRoutes(agency: Config.agency, completion: { (r) in
+            self.loading = false
             self.routes = r
             self.tableView.reloadData()
         })
@@ -53,6 +56,10 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if loading {
+            searchActive = false
+            return
+        }
         filtered = routes?.filter(byTitle: searchText)
         
         if searchText == "" {
@@ -71,6 +78,9 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if loading {
+            return 1
+        }
         guard let routes = self.getStops() else { return 0 }
         return routes.count
     }
@@ -78,7 +88,11 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "routeCell", for: indexPath)
-
+        if loading {
+            cell.textLabel?.text = "Loading..."
+            return cell
+        }
+        
         guard let stops = self.getStops() else { return cell }
         
         let object = stops[indexPath.row]
@@ -96,7 +110,9 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        if loading {
+            return
+        }
         
         guard let stops = self.getStops() else { return }
         
@@ -115,6 +131,9 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        if loading {
+            return []
+        }
         
         guard let stops = self.getStops(), stops.count >= indexPath.row  else { return [] }
         

@@ -8,11 +8,17 @@
 
 import UIKit
 
-class Constants {
+class Config {
 
     static let domain = "http://webservices.nextbus.com"
     
     static let favoriteRoutesKey = "FavoriteRoutes"
     static let favoriteStopsKey = "FavoritesStops"
+    
+    
+    static let agency = "ttc"
+    
+    static let showAdsVar = "showAds"
+    static let adUnitId = "ca-app-pub-3940256099942544/2934735716"
     
 }

@@ -19,16 +19,19 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     
     var directionTitle = ""
     
+    var loading = true
+    
     func configureView() {
         // Update the user interface for the detail item.
         if let detail = detailItem {
             
             
-            guard let stopIdStr = detail.attr("tag"), let stopId = Int(stopIdStr) else { return }
+            guard let stopIdStr = detail.attr("tag") else { return }
             
             self.title = "Stop \(stopIdStr)"
             
-            Service.shared.loadPredictions(route: routeId, stop: stopId, completion: { (xml, title) in
+            Service.shared.loadPredictions(route: routeId, stop: stopIdStr, completion: { (xml, title) in
+                self.loading = false
                 self.predictions = xml
                 if let title = title {
                     self.directionTitle = title
@@ -68,27 +71,55 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let p = self.predictions else { return 0 }
+        if self.loading{
+            return 1
+        }
+        guard let p = self.predictions, p.count > 0 else { return 1 }
         return p.count
     }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if self.loading{
+            return nil
+        }
+        
+        guard let predictions = self.predictions, predictions.count > 0 else {
+           return nil
+        }
+        
         return "Expected in"
+        
     }
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        if self.loading{
+            return nil
+        }
         return self.directionTitle
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PredictionCell", for: indexPath)
         
-        guard let p = self.predictions else { return cell }
+        if self.loading{
+            cell.textLabel?.text = "Loading..."
+            cell.detailTextLabel?.text = ""
+            
+            return cell
+        }
+        
+        guard let p = self.predictions, p.count > 0 else {
+            
+            cell.textLabel?.text = "No Data"
+            cell.detailTextLabel?.text = "No prediction entries found."
+            
+            return cell
+        }
         
         let object = p[indexPath.row]
         
-        let minutes = object.element?.attribute(by: "minutes")?.text
-        let seconds = object.element?.attribute(by: "seconds")?.text
-        let vehicleId = object.element?.attribute(by: "vehicle")?.text
-        if let depature = object.element?.attribute(by: "isDeparture")?.text {
+        let minutes = object.attr("minutes")
+        let seconds = object.attr("seconds")
+        let vehicleId = object.attr("vehicle")
+        if let depature = object.attr("isDeparture") {
             if let boolDeparture = Bool(depature) {
                 var departureString = "Departed"
                 if !boolDeparture {

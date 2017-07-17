@@ -24,6 +24,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
     var routes: [XMLIndexer]?
     var filtered: [XMLIndexer]?
     var searchActive = false
+    var loading = true
     
     let service = Service.shared
     let utilities = Utilities.shared
@@ -35,10 +36,10 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
         reloadRoutes()
         
         
-        if let value = ProcessInfo.processInfo.environment["showAds"], let showAds = Bool(value), showAds {
+        if let value = ProcessInfo.processInfo.environment[Config.showAdsVar], let showAds = Bool(value), showAds {
             bannerView = GADBannerView(adSize: kGADAdSizeFullBanner)
             self.view.addSubview(bannerView)
-            bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+            bannerView.adUnitID = Config.adUnitId
             bannerView.rootViewController = self
             bannerView.load(GADRequest())
             bannerView.delegate = self
@@ -71,12 +72,17 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if loading {
+            searchActive = false
+            return
+        }
+        
         filtered = routes?.filter(byTitle: searchText)
         
         if searchText == "" {
-            searchActive = false;
+            searchActive = false
         } else {
-            searchActive = true;
+            searchActive = true
         }
         
         self.tableView.reloadData()
@@ -112,6 +118,9 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if self.loading{
+            return 1
+        }
         
         guard let stops = self.getStops() else {
             return 0
@@ -123,23 +132,30 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
+        if self.loading{
+            cell.detailTextLabel?.text = ""
+            cell.textLabel?.text = "Loading..."
+            return cell
+        }
+        
         guard let stops = self.getStops(), stops.count >= indexPath.row  else { return cell }
         
         let object = stops[indexPath.row]
         
-        let title = object.element?.attribute(by: "title")
-        let stopId = object.element?.attribute(by: "stopId")
+        let title = object.attr("title")
+        let stopId = object.attr("stopId")
         
-        cell.detailTextLabel?.text = title?.text
-        cell.textLabel?.text = stopId?.text
-        
+        cell.detailTextLabel?.text = title
+        cell.textLabel?.text = stopId
         
         return cell
     }
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
-        guard let stops = self.getStops(), stops.count >= indexPath.row  else { return [] }
+        if self.loading { return [] }
+        
+        guard let stops = self.getStops(), stops.count >= indexPath.row, stops.count == 0  else { return [] }
         
         let object = stops[indexPath.row]
         
@@ -172,7 +188,9 @@ class MasterViewController: UITableViewController, UISearchBarDelegate, GADBanne
     
     // MARK: - Network Calls
     func reloadRoutes() {
+        self.loading = true
         service.loadRouteDetails(route: route, completion: { (r, title) in
+            self.loading = false
             self.routes = r
             self.title = title
             self.tableView.reloadData()
