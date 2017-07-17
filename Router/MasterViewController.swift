@@ -8,14 +8,18 @@
 
 import UIKit
 import SWXMLHash
+import GoogleMobileAds
+import Foundation
 
-class MasterViewController: UITableViewController, UISearchBarDelegate {
+
+class MasterViewController: UITableViewController, UISearchBarDelegate, GADBannerViewDelegate {
 
     var detailViewController: DetailViewController? = nil
     var objects = [Any]()
     
     var route = 199
     
+    var bannerView: GADBannerView!
     
     var routes: [XMLIndexer]?
     var filtered: [XMLIndexer]?
@@ -29,6 +33,17 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         super.viewDidLoad()
         
         reloadRoutes()
+        
+        
+        if let value = ProcessInfo.processInfo.environment["showAds"], let showAds = Bool(value), showAds {
+            bannerView = GADBannerView(adSize: kGADAdSizeFullBanner)
+            self.view.addSubview(bannerView)
+            bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+            bannerView.rootViewController = self
+            bannerView.load(GADRequest())
+            bannerView.delegate = self
+        }
+
     }
     
     override func didReceiveMemoryWarning() {
@@ -78,6 +93,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
                 
                 let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
                 controller.detailItem = stop
+                controller.routeId = self.route
                 controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true
             }
@@ -171,6 +187,39 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
     }
     
     
+    // MARK: - Google Ad Events
+    /// Tells the delegate an ad request loaded an ad.
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        print("adViewDidReceiveAd")
+    }
+    
+    /// Tells the delegate an ad request failed.
+    func adView(_ bannerView: GADBannerView,
+                didFailToReceiveAdWithError error: GADRequestError) {
+        print("adView:didFailToReceiveAdWithError: \(error.localizedDescription)")
+    }
+    
+    /// Tells the delegate that a full screen view will be presented in response
+    /// to the user clicking on an ad.
+    func adViewWillPresentScreen(_ bannerView: GADBannerView) {
+        print("adViewWillPresentScreen")
+    }
+    
+    /// Tells the delegate that the full screen view will be dismissed.
+    func adViewWillDismissScreen(_ bannerView: GADBannerView) {
+        print("adViewWillDismissScreen")
+    }
+    
+    /// Tells the delegate that the full screen view has been dismissed.
+    func adViewDidDismissScreen(_ bannerView: GADBannerView) {
+        print("adViewDidDismissScreen")
+    }
+    
+    /// Tells the delegate that a user click will open another app (such as
+    /// the App Store), backgrounding the current app.
+    func adViewWillLeaveApplication(_ bannerView: GADBannerView) {
+        print("adViewWillLeaveApplication")
+    }
 
 }
 

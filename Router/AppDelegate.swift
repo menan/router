@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
@@ -20,6 +21,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
         navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
         splitViewController.delegate = self
+        
+        
+        // Use Firebase library to configure APIs.
+        FirebaseApp.configure()
+        
+        // Initialize the Google Mobile Ads SDK.
+        GADMobileAds.configure(withApplicationID: "YOUR_ADMOB_APP_ID")
+        
+        
         return true
     }
 

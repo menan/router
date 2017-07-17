@@ -24,7 +24,7 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if let detail = detailItem {
             
             
-            guard let stopIdStr = detail.element?.attribute(by: "tag")?.text, let stopId = Int(stopIdStr) else { return }
+            guard let stopIdStr = detail.attr("tag"), let stopId = Int(stopIdStr) else { return }
             
             self.title = "Stop \(stopIdStr)"
             
