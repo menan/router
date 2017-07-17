@@ -15,6 +15,8 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     var filtered: [XMLIndexer]?
     var searchActive = false
     
+    var masterViewCtrl: MasterViewController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -78,13 +80,34 @@ class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
         guard let stops = self.getStops() else { return cell }
         
         let object = stops[indexPath.row]
-        let title = object.element?.attribute(by: "title")
-        cell.textLabel?.text = title?.text
+        let title = object.attr("title")
+        if let tag = object.attr("tag"), let tagInt = Int(tag), tagInt == masterViewCtrl?.route{
+            cell.textLabel?.textColor = UIColor.blue
+        }
+        else{
+            cell.textLabel?.textColor = UIColor.black
+        }
+        
+        cell.textLabel?.text = title
 
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        
+        guard let stops = self.getStops() else { return }
+        
+        let object = stops[indexPath.row]
+        
+        guard let tag = object.attr("tag"),
+            let tagInt = Int(tag),
+            let masterViewCtrl = masterViewCtrl else { return }
+        
+        
+        masterViewCtrl.route = tagInt
+        masterViewCtrl.reloadRoutes()
+        
         self.dismiss(animated: true, completion: nil)
     }
     

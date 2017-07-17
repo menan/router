@@ -14,6 +14,8 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
     var detailViewController: DetailViewController? = nil
     var objects = [Any]()
     
+    var route = 199
+    
     
     var routes: [XMLIndexer]?
     var filtered: [XMLIndexer]?
@@ -26,13 +28,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        service.loadRouteDetails(route: 199, completion: { (r, title) in
-            self.routes = r
-            self.title = title
-            self.tableView.reloadData()
-        })
-        
+        reloadRoutes()
     }
     
     override func didReceiveMemoryWarning() {
@@ -86,6 +82,11 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
                 controller.navigationItem.leftItemsSupplementBackButton = true
             }
         }
+        else {
+            if let controller = (segue.destination as! UINavigationController).topViewController as? RoutesTableViewController{
+                controller.masterViewCtrl = self
+            }
+        }
     }
 
     // MARK: - Table View
@@ -120,6 +121,25 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        
+        let action1 = UITableViewRowAction(style: .default, title: "Add Favorite", handler: {
+            (action, indexPath) in
+            print("Action1")
+        })
+        action1.backgroundColor = UIColor.blue
+        return [action1]
+    }
+    
+    // MARK: - Network Calls
+    func reloadRoutes() {
+        service.loadRouteDetails(route: route, completion: { (r, title) in
+            self.routes = r
+            self.title = title
+            self.tableView.reloadData()
+        })
+    }
     
     // MARK: - Helper Functions
     func getStops() -> [XMLIndexer]?{
@@ -127,6 +147,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         if searchActive { localRoutes = filtered }
         return localRoutes
     }
+    
     
 
 }

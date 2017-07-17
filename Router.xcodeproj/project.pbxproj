@@ -17,6 +17,7 @@
 		688CCFB61F1A7AFF00BCF48D /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688CCFB51F1A7AFF00BCF48D /* Constants.swift */; };
 		688CCFBA1F1AA01600BCF48D /* RoutesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688CCFB91F1AA01600BCF48D /* RoutesTableViewController.swift */; };
 		688CCFBC1F1AC10000BCF48D /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688CCFBB1F1AC10000BCF48D /* Extensions.swift */; };
+		688CCFBF1F1C5C8400BCF48D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688CCFBE1F1C5C8400BCF48D /* Utilities.swift */; };
 		81CF48253F1F31FF37C21575 /* Pods_Router.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0DD99EE57706D5B471CC66E /* Pods_Router.framework */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,7 @@
 		688CCFB51F1A7AFF00BCF48D /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		688CCFB91F1AA01600BCF48D /* RoutesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutesTableViewController.swift; sourceTree = "<group>"; };
 		688CCFBB1F1AC10000BCF48D /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		688CCFBE1F1C5C8400BCF48D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		A0DD99EE57706D5B471CC66E /* Pods_Router.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Router.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B44CDB3CB34C8718C4C6F4E5 /* Pods-Router.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Router.release.xcconfig"; path = "Pods/Target Support Files/Pods-Router/Pods-Router.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -92,6 +94,7 @@
 				688CCFB31F1A7AB000BCF48D /* Service.swift */,
 				688CCFB51F1A7AFF00BCF48D /* Constants.swift */,
 				688CCFBB1F1AC10000BCF48D /* Extensions.swift */,
+				688CCFBE1F1C5C8400BCF48D /* Utilities.swift */,
 				688CCFBD1F1AC99A00BCF48D /* ViewControllers */,
 				688CCFA51F1A713100BCF48D /* Main.storyboard */,
 				688CCFAA1F1A713100BCF48D /* LaunchScreen.storyboard */,
@@ -241,6 +244,7 @@
 				688CCFBA1F1AA01600BCF48D /* RoutesTableViewController.swift in Sources */,
 				688CCFA21F1A713100BCF48D /* MasterViewController.swift in Sources */,
 				688CCFA01F1A713100BCF48D /* AppDelegate.swift in Sources */,
+				688CCFBF1F1C5C8400BCF48D /* Utilities.swift in Sources */,
 				688CCFBC1F1AC10000BCF48D /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -24,3 +24,13 @@ extension Array where Iterator.Element == XMLIndexer {
     }
     
 }
+
+
+extension XMLIndexer {
+    func attr(_ key: String) -> String? {
+        guard let element = self.element, let value = element.attribute(by: key) else { return "" }
+        return value.text
+    }
+    
+    
+}
