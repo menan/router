@@ -21,14 +21,16 @@ class Service {
     
     //MARK: Route API Calls
     
-    func loadRouteDetails(route routeId: Int, completion: @escaping (_ result: XMLIndexer) -> Void, failed: @escaping (_ error: XMLIndexer) -> Void){
+    func loadRouteDetails(route routeId: Int, completion: @escaping (_ result: [XMLIndexer],_ title: String?) -> Void){
         
         let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=routeConfig&a=\(agency)&r=\(routeId)")
             .response { response in
                 
                 if let data = response.data {
                     let xml = SWXMLHash.parse(data)
-                    completion(xml)
+                    let stops = xml["body"]["route"]["stop"].all
+                    let title = xml["body"]["route"].element?.attribute(by: "title")?.text
+                    completion(stops, title)
                 }
                 
         }
@@ -38,14 +40,34 @@ class Service {
     }
     
     
-    func loadRoutes(agency agencyId: String, completion: @escaping (_ result: XMLIndexer) -> Void, failed: @escaping (_ error: XMLIndexer) -> Void){
+    func loadRoutes(agency agencyId: String, completion: @escaping (_ result: [XMLIndexer]) -> Void){
         
         let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=routeList&a=\(agencyId)")
             .response { response in
                 
                 if let data = response.data {
                     let xml = SWXMLHash.parse(data)
-                    completion(xml)
+                    completion(xml["body"]["route"].all)
+                }
+                
+        }
+        if debug {
+            debugPrint(request)
+        }
+    }
+    
+    
+    
+    func loadPredictions(route routeId: Int, stop stopId: Int, completion: @escaping (_ result: [XMLIndexer],_ title: String?) -> Void){
+        
+        let request = Alamofire.request("\(Constants.domain)/service/publicXMLFeed?command=predictions&a=\(agency)&r=\(routeId)&s=\(stopId)")
+            .response { response in
+                
+                if let data = response.data {
+                    let xml = SWXMLHash.parse(data)
+                    let predictions = xml["body"]["predictions"]["direction"].children
+                    let title = xml["body"]["predictions"]["direction"].element?.attribute(by: "title")?.text
+                    completion(predictions, title)
                 }
                 
         }

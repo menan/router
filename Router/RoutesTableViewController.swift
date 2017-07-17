@@ -9,9 +9,11 @@
 import UIKit
 import SWXMLHash
 
-class RoutesTableViewController: UITableViewController {
+class RoutesTableViewController: UITableViewController, UISearchBarDelegate {
     
-    var routes: XMLIndexer?
+    var routes: [XMLIndexer]?
+    var filtered: [XMLIndexer]?
+    var searchActive = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,41 +21,61 @@ class RoutesTableViewController: UITableViewController {
         Service.shared.loadRoutes(agency: "ttc", completion: { (r) in
             self.routes = r
             self.tableView.reloadData()
-        }) { (error) in
-            print("Error \(error)")
-        }
+        })
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
+    // MARK: - Table view data source
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchActive = true;
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filtered = routes?.filter(byTitle: searchText)
+        
+        if searchText == "" {
+            searchActive = false;
+        } else {
+            searchActive = true;
+        }
+        
+        self.tableView.reloadData()
+    }
 
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        
-        guard let routes = self.getStops() else {
-            return 0
-        }
-        
-        return routes.all.count
+        guard let routes = self.getStops() else { return 0 }
+        return routes.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "routeCell", for: indexPath)
 
-        
-        guard let stops = self.getStops() else {
-            return cell
-        }
+        guard let stops = self.getStops() else { return cell }
         
         let object = stops[indexPath.row]
         let title = object.element?.attribute(by: "title")
@@ -63,7 +85,6 @@ class RoutesTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -80,15 +101,13 @@ class RoutesTableViewController: UITableViewController {
     
     // MARK: - Helper Functions
     
-    func getStops() -> XMLIndexer?{
-        
-        guard let r = routes else {
-            return nil
-        }
-        
-        return r["body"]["route"]
-        
+    func getStops() -> [XMLIndexer]?{
+        var localRoutes = routes
+        if searchActive { localRoutes = filtered }
+        return localRoutes
     }
+    
+    
     
     
     // MARK: - Actions
@@ -96,6 +115,4 @@ class RoutesTableViewController: UITableViewController {
     @IBAction func cancelTapped(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
     }
-    
-
 }

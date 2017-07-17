@@ -9,12 +9,15 @@
 import UIKit
 import SWXMLHash
 
-class MasterViewController: UITableViewController {
+class MasterViewController: UITableViewController, UISearchBarDelegate {
 
     var detailViewController: DetailViewController? = nil
     var objects = [Any]()
     
-    var routes: XMLIndexer?
+    
+    var routes: [XMLIndexer]?
+    var filtered: [XMLIndexer]?
+    var searchActive = false
     
     let service = Service.shared
     
@@ -24,13 +27,11 @@ class MasterViewController: UITableViewController {
         super.viewDidLoad()
         
         
-        service.loadRouteDetails(route: 199, completion: { (r) in
+        service.loadRouteDetails(route: 199, completion: { (r, title) in
             self.routes = r
+            self.title = title
             self.tableView.reloadData()
-            self.title = self.getTitle()
-        }) { (error) in
-            print("Error \(error)")
-        }
+        })
         
     }
     
@@ -38,18 +39,46 @@ class MasterViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
+    // MARK: - Table view data source
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchActive = true;
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchActive = false;
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filtered = routes?.filter(byTitle: searchText)
+        
+        if searchText == "" {
+            searchActive = false;
+        } else {
+            searchActive = true;
+        }
+        
+        self.tableView.reloadData()
+    }
+    
+    
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                
-                guard let stops = self.getStops() else {
-                    return
-                }
-                
+                guard let stops = self.getStops() else { return }
                 let stop = stops[indexPath.row]
-        
                 
                 let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
                 controller.detailItem = stop
@@ -71,15 +100,13 @@ class MasterViewController: UITableViewController {
             return 0
         }
         
-        return stops.all.count
+        return stops.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        guard let stops = self.getStops() else {
-            return cell
-        }
+        guard let stops = self.getStops(), stops.count >= indexPath.row  else { return cell }
         
         let object = stops[indexPath.row]
         
@@ -93,27 +120,14 @@ class MasterViewController: UITableViewController {
         return cell
     }
     
+    
     // MARK: - Helper Functions
-    
-    func getStops() -> XMLIndexer?{
-        
-        guard let r = routes else {
-            return nil
-        }
-        
-        return r["body"]["route"]["stop"]
-        
+    func getStops() -> [XMLIndexer]?{
+        var localRoutes = routes
+        if searchActive { localRoutes = filtered }
+        return localRoutes
     }
     
-    func getTitle() -> String?{
-        
-        guard let r = routes else {
-            return nil
-        }
-        
-        return r["body"]["route"].element?.attribute(by: "title")?.text
-    }
-
 
 }
 
