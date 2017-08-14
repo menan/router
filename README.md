@@ -7,7 +7,7 @@ Bus routing app using NextBus API
 - Navigate the project folder: `cd router`
 - Install necessary pods: `pod install`
 - Open *Router.xcodeworkspace*
-
+- Run the project :)
 
 ## Schemes
 - *Router+*
